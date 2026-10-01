@@ -1,0 +1,34 @@
+Grim for Minestom includes the common engine from GrimAnticheat/Grim (GPL-3.0).
+The repository root LICENSE is included as META-INF/LICENSE.
+
+Bundled third-party components:
+
+GrimAPI and grim-internal 1.6.0.12
+  https://github.com/GrimAnticheat/GrimAPI
+  MIT; see GrimAPI-LICENSE.txt
+
+PacketEvents API and Netty common 2.14.1-20260926.204002-6
+  https://github.com/retrooper/packetevents
+  GPL-3.0; see PacketEvents-LICENSE.txt
+
+Configuralize 1.4.1 (slim)
+  https://github.com/Scarsz/Configuralize
+  Unlicense; see Configuralize-LICENSE.txt
+
+Dynamics 4.0 and Fluent 2.0
+  https://github.com/alexheretic/dynamics
+  https://github.com/alexheretic/fluent
+  Apache-2.0; see Dynamics-LICENSE.txt and Fluent-LICENSE.txt
+
+JSON.simple 1.1.1
+  https://github.com/fangyidong/json-simple
+  Apache-2.0; see JsonSimple-LICENSE.txt
+
+LMAX Disruptor 3.4.4
+  https://github.com/LMAX-Exchange/disruptor
+  Apache-2.0; see Disruptor-LICENSE.txt
+
+Upstream source artifacts for the embedded libraries accompany this release in
+its sources JAR. Configuralize publishes dependency sources only; its own source
+is available at https://github.com/Scarsz/Configuralize/tree/master/src/main/java.
+Remaining dependencies are resolved separately from Maven Central.

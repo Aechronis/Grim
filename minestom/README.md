@@ -15,7 +15,7 @@ For source dependencies, add this to your application's `settings.gradle.kts` (a
 ```kotlin
 includeBuild("../Grim") {
     dependencySubstitution {
-        substitute(module("ac.grim.grimac:grim-minestom")).using(project(":minestom"))
+        substitute(module("net.aechronis:grim-minestom")).using(project(":minestom"))
     }
 }
 ```
@@ -23,14 +23,14 @@ includeBuild("../Grim") {
 Add the single library dependency alongside the application's Minestom dependency:
 
 ```kotlin
-implementation("ac.grim.grimac:grim-minestom:local")
+implementation("net.aechronis:grim-minestom:local")
 ```
 
 The library includes both the platform adapter and the native Minestom extensions and detachable callbacks. Reloadable hosts must package `ac/grim/grimac/minestom/**` from this JAR in the host classloader and exclude that package from the replaceable classloader's JAR. The remaining adapter classes and engine dependencies belong in the replaceable classloader. Do not put the full library or its engine dependencies on the host classpath when using engine replacement.
 
-Composite builds include only the common engine and the Minestom project by default. For Maven consumption, publish `:common` and `:minestom` together at the same version to your repository. These coordinates are not an announced upstream release.
+Composite builds include only the common engine and the Minestom project by default. The published `grim-minestom` JAR includes the common engine, Grim API/internal libraries, PacketEvents, and Configuralize. There is no separate common or support artifact to install.
 
-The library's runtime repositories are Maven Central, `https://maven.grim.ac/public/releases`, `https://repo.codemc.io/repository/maven-snapshots/`, and `https://nexus.scarsz.me/content/repositories/releases`. The Minestom adapter pins an upstream PacketEvents snapshot containing Adventure 5 support. The other Grim platforms retain their existing PacketEvents dependency.
+Published releases and their remaining dependencies resolve using only `mavenCentral()`. Building this checkout still uses the upstream repositories for bundled libraries. The adapter pins a PacketEvents snapshot containing Adventure 5 support; the other Grim platforms retain their existing dependency. See [publishing instructions](PUBLISHING.md) for release setup and verification.
 
 Initialize the native support before Minestom loads its settings, install its player provider after initialization, then start Grim before accepting players:
 

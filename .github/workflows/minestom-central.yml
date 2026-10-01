@@ -1,0 +1,88 @@
+name: Minestom Maven Central
+
+on:
+    push:
+        branches: [minestom]
+        paths: ['minestom/**', 'common/**', 'buildSrc/**', '*.gradle.kts', '*.toml', 'gradle/**', '.github/workflows/minestom-central.yml']
+    pull_request:
+        paths: ['minestom/**', 'common/**', 'buildSrc/**', '*.gradle.kts', '*.toml', 'gradle/**', '.github/workflows/minestom-central.yml']
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Release version, for example 2.3.74-minestom.1'
+                required: true
+                type: string
+                default: '2.3.74-minestom.1'
+            publish:
+                description: 'Publish the verified release to Maven Central'
+                required: true
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+concurrency:
+    group: minestom-central-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    verify-and-publish:
+        runs-on: ubuntu-latest
+        timeout-minutes: 45
+        env:
+            RELEASE_VERSION: ${{ inputs.version || '0.0.0-check' }}
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 25
+            - uses: gradle/actions/setup-gradle@v4
+            - name: Validate version
+              run: |
+                  python3 - <<'PY'
+                  import os, re
+                  version = os.environ['RELEASE_VERSION']
+                  assert re.fullmatch(r'\d+\.\d+\.\d+(?:[.-][A-Za-z0-9]+)*', version), 'Invalid release version'
+                  assert 'SNAPSHOT' not in version, 'Use a release version'
+                  PY
+            - name: Build local Maven publication
+              run: >-
+                  ./gradlew -PminestomOnly=true -PmavenLocalOverride=false
+                  "-PminestomVersion=$RELEASE_VERSION"
+                  :minestom:publishAllPublicationsToLocalBuildRepository
+                  -x :minestom:signMavenPublication
+            - name: Verify publication contents and metadata
+              run: python3 minestom/verify-publication.py minestom/build/repository "$RELEASE_VERSION"
+            - name: Test Gradle metadata consumer using only Central dependencies
+              run: >-
+                  ./gradlew -p minestom/consumer-check
+                  "-PlibraryRepository=$GITHUB_WORKSPACE/minestom/build/repository"
+                  "-PlibraryVersion=$RELEASE_VERSION" run
+            - name: Test Maven POM consumer using only Central dependencies
+              run: >-
+                  ./gradlew -p minestom/consumer-check -PpomOnly=true
+                  "-PlibraryRepository=$GITHUB_WORKSPACE/minestom/build/repository"
+                  "-PlibraryVersion=$RELEASE_VERSION" run
+            - name: Upload verified publication
+              uses: actions/upload-artifact@v4
+              with:
+                  name: grim-minestom-${{ env.RELEASE_VERSION }}
+                  path: minestom/build/repository/
+            - name: Publish to Maven Central
+              if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/minestom'
+              env:
+                  ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+                  ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+                  ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_KEY }}
+                  ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+              run: |
+                  for variable in ORG_GRADLE_PROJECT_mavenCentralUsername ORG_GRADLE_PROJECT_mavenCentralPassword ORG_GRADLE_PROJECT_signingInMemoryKey ORG_GRADLE_PROJECT_signingInMemoryKeyPassword; do
+                      if [ -z "${!variable}" ]; then
+                          echo "Missing required secret for $variable" >&2
+                          exit 1
+                      fi
+                  done
+                  ./gradlew -PminestomOnly=true -PmavenLocalOverride=false \
+                      "-PminestomVersion=$RELEASE_VERSION" :minestom:publishAndReleaseToMavenCentral
