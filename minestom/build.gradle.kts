@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     api(project(":common"))
-    compileOnly(project(":minestom-agent"))
+    compileOnly(project(":minestom-support"))
     compileOnly("net.minestom:minestom:2026.09.12-26.2")
     // Includes upstream Adventure 5 compatibility required by this Minestom release.
     implementation("com.github.retrooper:packetevents-api:2.14.1-20260926.204002-6") {

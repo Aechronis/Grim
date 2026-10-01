@@ -5,7 +5,7 @@ import ac.grim.grimac.api.GrimAPIProvider;
 import ac.grim.grimac.api.GrimAbstractAPI;
 import ac.grim.grimac.api.plugin.BasicGrimPlugin;
 import ac.grim.grimac.api.plugin.GrimPlugin;
-import ac.grim.grimac.minestom.agent.MinestomAgent;
+import ac.grim.grimac.minestom.MinestomSupport;
 import ac.grim.grimac.platform.api.*;
 import ac.grim.grimac.platform.api.command.CommandService;
 import ac.grim.grimac.platform.api.manager.*;
@@ -128,7 +128,7 @@ public final class GrimMinestom implements PlatformLoader, AutoCloseable {
     public synchronized void start() {
         if (started || closed)
             throw new IllegalStateException("This Grim runtime has already been started or closed");
-        MinestomAgent.requireInstalled();
+        MinestomSupport.requireInstalled();
         if (MinecraftServer.PROTOCOL_VERSION != 776)
             throw new IllegalStateException("This adapter targets Minestom 26.2 (protocol 776)");
         if (!USED.compareAndSet(false, true))

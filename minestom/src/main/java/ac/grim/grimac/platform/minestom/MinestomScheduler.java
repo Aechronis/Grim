@@ -1,7 +1,7 @@
 package ac.grim.grimac.platform.minestom;
 
 import ac.grim.grimac.api.plugin.GrimPlugin;
-import ac.grim.grimac.minestom.agent.CallbackSlot;
+import ac.grim.grimac.minestom.CallbackSlot;
 import ac.grim.grimac.platform.api.entity.GrimEntity;
 import ac.grim.grimac.platform.api.scheduler.*;
 import ac.grim.grimac.platform.api.world.PlatformWorld;

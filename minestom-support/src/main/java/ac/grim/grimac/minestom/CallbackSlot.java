@@ -1,4 +1,4 @@
-package ac.grim.grimac.minestom.agent;
+package ac.grim.grimac.minestom;
 
 /** Lets cancelled native tasks release the library classloader before their next scheduled tick. */
 public final class CallbackSlot implements Runnable, AutoCloseable {

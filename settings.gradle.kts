@@ -74,7 +74,7 @@ if (gradle.startParameter.isBuildScan) {
 
 rootProject.name = "grimac"
 include("common")
-include("minestom", "minestom-agent")
+include("minestom", "minestom-support")
 // Composite consumers of the Minestom library do not need Bukkit or Fabric toolchains.
 val minestomOnly = providers.gradleProperty("minestomOnly").map(String::toBoolean).getOrElse(gradle.parent != null)
 if (!minestomOnly) {
