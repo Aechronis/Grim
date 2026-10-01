@@ -143,5 +143,16 @@ publishing {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+    if (!providers.gradleProperty("unsignedLocalPublication").map(String::toBoolean).getOrElse(false)) {
+        signAllPublications()
+    }
+}
+
+tasks.withType<PublishToMavenRepository>().configureEach {
+    doFirst {
+        check(repository.name != "mavenCentral" ||
+            !providers.gradleProperty("unsignedLocalPublication").map(String::toBoolean).getOrElse(false)) {
+            "Unsigned publication is supported only for local verification"
+        }
+    }
 }

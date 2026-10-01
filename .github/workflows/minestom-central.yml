@@ -52,7 +52,7 @@ jobs:
                   ./gradlew -PminestomOnly=true -PmavenLocalOverride=false
                   "-PminestomVersion=$RELEASE_VERSION"
                   :minestom:publishAllPublicationsToLocalBuildRepository
-                  -x :minestom:signMavenPublication
+                  -PunsignedLocalPublication=true
             - name: Verify publication contents and metadata
               run: python3 minestom/verify-publication.py minestom/build/repository "$RELEASE_VERSION"
             - name: Test Gradle metadata consumer using only Central dependencies

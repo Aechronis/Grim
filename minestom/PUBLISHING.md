@@ -44,7 +44,7 @@ The equivalent local commands are:
 ./gradlew -PminestomOnly=true -PmavenLocalOverride=false \
   -PminestomVersion=2.3.74-minestom.1 \
   :minestom:publishAllPublicationsToLocalBuildRepository \
-  -x :minestom:signMavenPublication
+  -PunsignedLocalPublication=true
 python3 minestom/verify-publication.py minestom/build/repository 2.3.74-minestom.1
 ./gradlew -p minestom/consumer-check \
   -PlibraryRepository="$PWD/minestom/build/repository" \
@@ -61,7 +61,7 @@ validates coordinates, metadata, checksums, embedded classes, sources, documenta
 and separation from Minestom's own libraries.
 
 For signed local verification, supply these environment variables using a secure
-secret store, omit `-x :minestom:signMavenPublication`, and import `signing-key.asc`
+secret store, omit `-PunsignedLocalPublication=true`, and import `signing-key.asc`
 into GPG before running `verify-publication.py` with `--signed`:
 
 ```text
