@@ -229,8 +229,12 @@ final class MinestomConnection {
             byte[] payload = bytes(packet);
             if (output != null) encode(payload, silent);
             else {
-                // Use a normal native packet until the writer observes it. This keeps injected
-                // packets ordered with originals already queued by any producer thread.
+                // PacketEvents writes must run their listeners before returning: setbacks send
+                // a ping and immediately capture the transaction incremented by its listener.
+                // Deferring that listener to the socket writer records the previous transaction
+                // and makes every valid setback acknowledgement look like an ignored teleport.
+                // Dispatch through the host listeners now; send() queues the resulting immutable
+                // batch under this lock, keeping wire order equal to Grim's processing order.
                 var state =
                         net.minestom.server.network.ConnectionState.valueOf(
                                 user.getEncoderState().name());
@@ -244,7 +248,7 @@ final class MinestomConnection {
                                         body, 0, body.length, MinecraftServer.getRegistries()));
                 nativePacket = queueIdentity(nativePacket);
                 pending.put(nativePacket, new Pending(silent, null));
-                nativeConnection.sendPacket(nativePacket);
+                EventDispatcher.call(new PlayerPacketOutEvent(player, nativePacket));
             }
         } catch (Exception error) {
             fail(error);
