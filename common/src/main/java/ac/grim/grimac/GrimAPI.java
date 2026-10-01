@@ -76,13 +76,14 @@ public final class GrimAPI {
         if (ReflectionUtils.hasClass("io.papermc.paper.threadedregions.RegionizedServer")) return Platform.FOLIA;
         if (ReflectionUtils.hasClass("org.bukkit.Bukkit")) return Platform.BUKKIT;
         if (ReflectionUtils.hasClass("net.fabricmc.loader.api.FabricLoader")) return Platform.FABRIC;
+        if (ReflectionUtils.hasClass("net.minestom.server.MinecraftServer")) return Platform.MINESTOM;
         throw new IllegalStateException("Unknown platform!");
     }
 
     public void load(PlatformLoader platformLoader, Initable... platformSpecificInitables) {
         this.loader = platformLoader;
         this.dataStoreLifecycle = new DataStoreLifecycle(getGrimPlugin(), backendRegistry);
-        this.initManager = new InitManager(loader.getPacketEvents(), platformSpecificInitables);
+        this.initManager = new InitManager(loader.getPacketEvents(), loader.failOnLifecycleError(), platformSpecificInitables);
         this.initManager.load();
         this.initialized = true;
     }

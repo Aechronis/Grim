@@ -29,13 +29,17 @@ public class PacketEventsInit implements LoadableInitable {
         PacketEvents.getAPI().getSettings()
                 .fullStackTrace(true)
                 .kickOnPacketException(true)
-                .preViaInjection(true)
                 .checkForUpdates(false)
                 .reEncodeByDefault(false)
                 .debug(false);
+        // The Minestom transport owns its packet boundary and uses upstream PacketEvents,
+        // which has no Grim-specific ViaVersion injector setting.
+        if (ac.grim.grimac.GrimAPI.INSTANCE.getPlatform() != ac.grim.grimac.platform.api.Platform.MINESTOM) {
+            PacketEvents.getAPI().getSettings().preViaInjection(true);
+        }
         PacketEvents.getAPI().load();
         // This may seem useless, but it causes java to start loading stuff async before we need it
-        Executors.defaultThreadFactory().newThread(() -> {
+        Runnable preload = () -> {
             StateTypes.AIR.getName();
             ItemTypes.AIR.getName();
             EntityTypes.PLAYER.getParent();
@@ -44,6 +48,12 @@ public class PacketEventsInit implements LoadableInitable {
             EnchantmentTypes.ALL_DAMAGE_PROTECTION.getName();
             ParticleTypes.DUST.getName();
             WrappedBlockState.getByString(PacketEvents.getAPI().getServerManager().getVersion().toClientVersion(), "", false);
-        }).start();
+        };
+        if (ac.grim.grimac.GrimAPI.INSTANCE.getLoader().failOnLifecycleError()) {
+            // Embedded hosts own worker lifetimes; finish preloading before startup succeeds.
+            preload.run();
+        } else {
+            Executors.defaultThreadFactory().newThread(preload).start();
+        }
     }
 }

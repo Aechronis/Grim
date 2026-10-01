@@ -41,7 +41,7 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
     private static final Predicate<String> WEBHOOK_REGEX = Pattern.compile("^https://(?:canary\\.)?discord\\.com/api(?:/v\\d+)?/webhooks/\\d+/[\\w-]+(\\?thread_id=\\d+)?$").asMatchPredicate();
     private static final Predicate<String> HTTPS_URL_REGEX = Pattern.compile("^https://[^/\\s]+/\\S+$").asMatchPredicate();
     private static final Duration timeout = Duration.ofMillis(CommonGrimArguments.URL_TIMEOUT.value());
-    private static final HttpClient client = HttpClient.newBuilder().connectTimeout(timeout).build();
+    private static final java.util.function.Supplier<HttpClient> client = ac.grim.grimac.utils.anticheat.GrimHttpClients.create(timeout);
     private static final ConcurrentLinkedDeque<Pair<HttpRequest, CompletableFuture<Boolean>>> requests = new ConcurrentLinkedDeque<>();
     private static final AtomicBoolean taskStarted = new AtomicBoolean();
     private static final AtomicBoolean sending = new AtomicBoolean();
@@ -217,7 +217,7 @@ public class DiscordManager implements StartableInitable, ReloadableInitable {
         Pair<HttpRequest, CompletableFuture<Boolean>> pair = requests.peek();
         if (pair != null && rateLimitedUntil < System.currentTimeMillis() && !sending.getAndSet(true)) {
             HttpRequest request = pair.first();
-            client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).whenComplete((response, throwable) -> {
+            client.get().sendAsync(request, HttpResponse.BodyHandlers.ofString()).whenComplete((response, throwable) -> {
                 if (throwable != null) {
                     sending.set(false);
                     LogUtil.error("Exception caught while sending a Discord webhook alert", throwable);

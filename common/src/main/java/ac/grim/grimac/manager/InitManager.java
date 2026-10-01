@@ -15,6 +15,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 
 public class InitManager {
+    private final boolean failOnError;
 
     private final ImmutableList<LoadableInitable> initializersOnLoad;
     private final ImmutableList<StartableInitable> initializersOnStart;
@@ -28,6 +29,11 @@ public class InitManager {
     private boolean stopped = false;
 
     public InitManager(PacketEventsAPI<?> packetEventsAPI, Initable... platformSpecificInitables) {
+        this(packetEventsAPI, false, platformSpecificInitables);
+    }
+
+    public InitManager(PacketEventsAPI<?> packetEventsAPI, boolean failOnError, Initable... platformSpecificInitables) {
+        this.failOnError = failOnError;
         ArrayList<LoadableInitable> extraLoadableInitables = new ArrayList<>();
         ArrayList<StartableInitable> extraStartableInitables = new ArrayList<>();
         ArrayList<StoppableInitable> extraStoppableInitables = new ArrayList<>();
@@ -74,6 +80,7 @@ public class InitManager {
                 initable.load();
             } catch (Exception e) {
                 LogUtil.error("Failed to load " + initable.getClass().getSimpleName(), e);
+                if (failOnError) throw new IllegalStateException("Failed to load " + initable.getClass().getSimpleName(), e);
             }
         }
         loaded = true;
@@ -85,19 +92,24 @@ public class InitManager {
                 initable.start();
             } catch (Exception e) {
                 LogUtil.error("Failed to start " + initable.getClass().getSimpleName(), e);
+                if (failOnError) throw new IllegalStateException("Failed to start " + initable.getClass().getSimpleName(), e);
             }
         }
         started = true;
     }
 
     public void stop() {
+        IllegalStateException failure = null;
         for (StoppableInitable initable : initializersOnStop) {
             try {
                 initable.stop();
             } catch (Exception e) {
                 LogUtil.error("Failed to stop " + initable.getClass().getSimpleName(), e);
+                if (failure == null) failure = new IllegalStateException("Grim shutdown failed");
+                failure.addSuppressed(e);
             }
         }
         stopped = true;
+        if (failOnError && failure != null) throw failure;
     }
 }

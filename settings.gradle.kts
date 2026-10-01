@@ -74,16 +74,21 @@ if (gradle.startParameter.isBuildScan) {
 
 rootProject.name = "grimac"
 include("common")
-include("bukkit")
-include("fabric")
-include(":fabric:shared")
-include(":fabric:intermediary")
-include(":fabric:intermediary:mc1161")
-include(":fabric:intermediary:mc1171")
-include(":fabric:intermediary:mc1194")
-include(":fabric:intermediary:mc1205")
-include(":fabric:intermediary:mc12111")
-include(":fabric:official")
-include(":fabric:official:mc261")
+include("minestom", "minestom-agent")
+// Composite consumers of the Minestom library do not need Bukkit or Fabric toolchains.
+val minestomOnly = providers.gradleProperty("minestomOnly").map(String::toBoolean).getOrElse(gradle.parent != null)
+if (!minestomOnly) {
+    include("bukkit")
+    include("fabric")
+    include(":fabric:shared")
+    include(":fabric:intermediary")
+    include(":fabric:intermediary:mc1161")
+    include(":fabric:intermediary:mc1171")
+    include(":fabric:intermediary:mc1194")
+    include(":fabric:intermediary:mc1205")
+    include(":fabric:intermediary:mc12111")
+    include(":fabric:official")
+    include(":fabric:official:mc261")
+}
 
 if (file("workspace.gradle.kts").exists()) apply(from = "workspace.gradle.kts")

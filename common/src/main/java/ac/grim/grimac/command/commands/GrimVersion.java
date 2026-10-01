@@ -31,9 +31,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GrimVersion implements BuildableCommand {
 
     private static final AtomicReference<Component> updateMessage = new AtomicReference<>();
-    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .connectTimeout(Duration.of(CommonGrimArguments.URL_TIMEOUT.value(), ChronoUnit.MILLIS))
-            .build();
+    private static final java.util.function.Supplier<HttpClient> HTTP_CLIENT = ac.grim.grimac.utils.anticheat.GrimHttpClients.create(
+            Duration.of(CommonGrimArguments.URL_TIMEOUT.value(), ChronoUnit.MILLIS));
     private static long lastCheck;
 
     public static void checkForUpdatesAsync(Sender sender) {
@@ -66,7 +65,7 @@ public class GrimVersion implements BuildableCommand {
                     .timeout(Duration.of(CommonGrimArguments.URL_TIMEOUT.value(), ChronoUnit.MILLIS))
                     .build();
 
-            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = HTTP_CLIENT.get().send(request, HttpResponse.BodyHandlers.ofString());
             final int statusCode = response.statusCode();
             if (statusCode < 200 || statusCode >= 300) {
                 Component msg = updateMessage.get();

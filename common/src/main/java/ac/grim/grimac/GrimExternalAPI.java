@@ -167,6 +167,7 @@ public class GrimExternalAPI implements GrimAbstractAPI, ConfigReloadObserver, S
             GrimAPI.INSTANCE.getConfigManager().start();
         } catch (Exception e) {
             LogUtil.error("Failed to start config manager.", e);
+            if (api.getLoader().failOnLifecycleError()) throw new IllegalStateException("Failed to start config manager", e);
         }
     }
 
@@ -203,6 +204,7 @@ public class GrimExternalAPI implements GrimAbstractAPI, ConfigReloadObserver, S
             return true;
         } catch (Exception e) {
             LogUtil.error("Failed to reload config", e);
+            if (!started && api.getLoader().failOnLifecycleError()) throw new IllegalStateException("Failed to load config", e);
         }
         if (started)
             GrimAPI.INSTANCE.getScheduler().getAsyncScheduler().runNow(GrimAPI.INSTANCE.getGrimPlugin(),

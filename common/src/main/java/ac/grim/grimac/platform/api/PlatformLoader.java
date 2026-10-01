@@ -13,6 +13,9 @@ import com.github.retrooper.packetevents.PacketEventsAPI;
 import org.jetbrains.annotations.NotNull;
 
 public interface PlatformLoader {
+    /** Embedded hosts need lifecycle failures to propagate to their owner. */
+    default boolean failOnLifecycleError() { return false; }
+
     PlatformScheduler getScheduler();
 
     PlatformPlayerFactory getPlatformPlayerFactory();
