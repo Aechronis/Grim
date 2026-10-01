@@ -966,7 +966,13 @@ public class GrimPlayer implements GrimUser {
 
     public void runNettyTaskInMs(@NotNull Runnable runnable, int ms) {
         Objects.requireNonNull(runnable, "runnable");
-        ((Channel) user.getChannel()).eventLoop().schedule(runnable, ms, TimeUnit.MILLISECONDS);
+        if (user.getChannel() instanceof Channel channel) {
+            channel.eventLoop().schedule(runnable, ms, TimeUnit.MILLISECONDS);
+        } else {
+            // Native transports serialize callbacks through their ChannelOperator.
+            GrimAPI.INSTANCE.getScheduler().getAsyncScheduler().runDelayed(
+                    GrimAPI.INSTANCE.getGrimPlugin(), () -> runSafely(runnable), ms, TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
