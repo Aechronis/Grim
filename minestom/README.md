@@ -7,7 +7,7 @@ This platform adapter embeds Grim's existing checks in a stock Minestom server. 
 From this repository:
 
 ```sh
-./gradlew -PminestomOnly=true :minestom:build :minestom-support:build
+./gradlew -PminestomOnly=true :minestom:build
 ```
 
 For source dependencies, add this to your application's `settings.gradle.kts` (adjust the checkout path):
@@ -16,21 +16,19 @@ For source dependencies, add this to your application's `settings.gradle.kts` (a
 includeBuild("../Grim") {
     dependencySubstitution {
         substitute(module("ac.grim.grimac:grim-minestom")).using(project(":minestom"))
-        substitute(module("ac.grim.grimac:grim-minestom-support")).using(project(":minestom-support"))
     }
 }
 ```
 
-Add both ordinary library dependencies alongside the application's Minestom dependency:
+Add the single library dependency alongside the application's Minestom dependency:
 
 ```kotlin
-implementation("ac.grim.grimac:grim-minestom-support:local")
 implementation("ac.grim.grimac:grim-minestom:local")
 ```
 
-The support library contains Minestom extensions and detachable callbacks; it must remain in the host classloader if the engine is reloaded. Reloadable hosts put only `grim-minestom` and its engine dependencies in the replaceable classloader.
+The library includes both the platform adapter and the native Minestom extensions and detachable callbacks. Reloadable hosts must package `ac/grim/grimac/minestom/**` from this JAR in the host classloader and exclude that package from the replaceable classloader's JAR. The remaining adapter classes and engine dependencies belong in the replaceable classloader. Do not put the full library or its engine dependencies on the host classpath when using engine replacement.
 
-Composite builds include only the common engine and the Minestom projects by default. For Maven consumption, publish `:common`, `:minestom`, and `:minestom-support` together at the same version to your repository. These coordinates are not an announced upstream release.
+Composite builds include only the common engine and the Minestom project by default. For Maven consumption, publish `:common` and `:minestom` together at the same version to your repository. These coordinates are not an announced upstream release.
 
 The library's runtime repositories are Maven Central, `https://maven.grim.ac/public/releases`, `https://repo.codemc.io/repository/maven-snapshots/`, and `https://nexus.scarsz.me/content/repositories/releases`. The Minestom adapter pins an upstream PacketEvents snapshot containing Adventure 5 support. The other Grim platforms retain their existing PacketEvents dependency.
 
@@ -62,9 +60,9 @@ Call `grim.close()` before stopping Minestom. Hosts with a staged shutdown can c
 
 ## Reloading
 
-`/grim reload` (or `grim.api().reloadAsync()`) reloads upstream configuration while retaining player tracking. Replacing the engine requires closing the previous runtime and loading the library **and its engine dependencies in a fresh classloader**. There can be only one active runtime in a process and one startup per engine classloader.
+`/grim reload` (or `grim.api().reloadAsync()`) reloads upstream configuration while retaining player tracking. Replacing the engine requires closing the previous runtime and loading the adapter **and its engine dependencies in a fresh classloader**, while the native support package stays in the host classloader. There can be only one active runtime in a process and one startup per engine classloader.
 
-Full engine replacement disconnects tracked players. Enabling the engine while players are already connected also disconnects them: their earlier world and transaction history cannot be reconstructed safely. Reconnecting gives each player a complete tracked session. Updating the support library or the host player class requires restarting the server process; neither is part of the reloadable engine.
+Full engine replacement disconnects tracked players. Enabling the engine while players are already connected also disconnects them: their earlier world and transaction history cannot be reconstructed safely. Reconnecting gives each player a complete tracked session. Updating the native support classes or the host player class requires restarting the server process; neither is part of the reloadable engine.
 
 ## Packet transport
 
@@ -88,4 +86,4 @@ The initial supported transport is direct Java clients using Minestom's native p
 
 ## Following upstream
 
-Keep upstream changes in `common` limited to platform detection and embedded lifecycle integration; implement platform behavior here and in `minestom-support`. The checks remain upstream code. Keep the original repository as the `upstream` Git remote and merge its `2.0` branch into your Minestom branch. After updating, verify startup, complete login, compression, chunk/block tracking, transaction ordering, cancellation, and shutdown/reload against the pinned Minestom release before distributing it.
+Keep upstream changes in `common` limited to platform detection and embedded lifecycle integration; implement platform behavior in `minestom`. The checks remain upstream code. Keep the original repository as the `upstream` Git remote and merge its `2.0` branch into your Minestom branch. After updating, verify startup, complete login, compression, chunk/block tracking, transaction ordering, cancellation, and shutdown/reload against the pinned Minestom release before distributing it.
