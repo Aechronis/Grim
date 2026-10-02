@@ -3,7 +3,6 @@ name: Minestom Maven Central
 on:
     push:
         branches: [minestom]
-        paths: ['minestom/**', 'common/**', 'buildSrc/**', '*.gradle.kts', '*.toml', 'gradle/**', '.github/workflows/minestom-central.yml']
     pull_request:
         paths: ['minestom/**', 'common/**', 'buildSrc/**', '*.gradle.kts', '*.toml', 'gradle/**', '.github/workflows/minestom-central.yml']
     workflow_dispatch:
@@ -55,7 +54,9 @@ jobs:
                   name: grim-minestom-${{ env.RELEASE_VERSION }}
                   path: minestom/build/repository/
     publish:
-        if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/minestom'
+        if: >-
+            github.ref == 'refs/heads/minestom' &&
+            (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish))
         needs: verify
         runs-on: ubuntu-latest
         timeout-minutes: 45
