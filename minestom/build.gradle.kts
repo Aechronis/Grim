@@ -61,7 +61,7 @@ dependencies {
     add(embedded.name, "com.github.retrooper:packetevents-netty-common:2.14.1-20260926.204002-6")
     implementation("com.google.guava:guava:33.7.1-jre")
     runtimeOnly("org.xerial:sqlite-jdbc:3.53.4.0")
-    implementation("io.netty:netty-buffer:4.1.118.Final")
+    api("io.netty:netty-buffer:4.1.118.Final")
     implementation("io.netty:netty-transport:4.1.118.Final")
 }
 

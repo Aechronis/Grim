@@ -1,6 +1,8 @@
 package ac.grim.grimac.platform.minestom.packet;
 
 import com.github.retrooper.packetevents.PacketEventsAPI;
+import com.github.retrooper.packetevents.event.EventManager;
+import com.github.retrooper.packetevents.event.ProtocolPacketEvent;
 import com.github.retrooper.packetevents.injector.ChannelInjector;
 import com.github.retrooper.packetevents.manager.player.PlayerManager;
 import com.github.retrooper.packetevents.manager.protocol.ProtocolManager;
@@ -18,6 +20,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 
 public final class MinestomPacketEvents extends PacketEventsAPI<MinestomTransport> {
+    private final MinestomEventManager events = new MinestomEventManager();
     private final MinestomTransport transport = new MinestomTransport(this);
     private final ServerVersion version = ServerVersion.getById(MinecraftServer.PROTOCOL_VERSION);
     private boolean loaded, initialized, terminated;
@@ -108,6 +111,15 @@ public final class MinestomPacketEvents extends PacketEventsAPI<MinestomTranspor
                     return false;
                 }
             };
+
+    @Override
+    public EventManager getEventManager() {
+        return events;
+    }
+
+    void callPreTranslationEvent(ProtocolPacketEvent event, Runnable afterListener) {
+        events.callPreTranslationEvent(event, afterListener);
+    }
 
     @Override
     public void load() {

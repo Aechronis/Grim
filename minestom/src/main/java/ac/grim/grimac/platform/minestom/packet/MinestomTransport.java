@@ -3,6 +3,7 @@ package ac.grim.grimac.platform.minestom.packet;
 import ac.grim.grimac.GrimAPI;
 import ac.grim.grimac.minestom.GrimPlayer;
 import ac.grim.grimac.minestom.PacketBridge;
+import ac.grim.grimac.minestom.PacketTransport;
 
 import com.github.retrooper.packetevents.event.UserConnectEvent;
 import com.github.retrooper.packetevents.util.PacketEventsImplHelper;
@@ -47,7 +48,11 @@ public final class MinestomTransport implements PacketBridge.Listener, AutoClose
             throw new IllegalStateException(
                     "Grim requires GrimPlayer with a native socket connection");
         }
-        MinestomConnection connection = new MinestomConnection(api, socket, (GrimPlayer) player);
+        MinestomConnection connection =
+                socket instanceof PacketTransport translated
+                        ? new TranslatedMinestomConnection(
+                                api, socket, (GrimPlayer) player, translated)
+                        : new NativeMinestomConnection(api, socket, (GrimPlayer) player);
         connections.put(socket, connection);
         connection.run(
                 () -> {
