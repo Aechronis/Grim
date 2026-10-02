@@ -30,7 +30,7 @@ The library includes both the platform adapter and the native Minestom extension
 
 Composite builds include only the common engine and the Minestom project by default. The published `grim-minestom` JAR includes the common engine, Grim API/internal libraries, PacketEvents, and Configuralize. There is no separate common or support artifact to install.
 
-Published releases and their remaining dependencies resolve using only `mavenCentral()`. Building this checkout still uses the upstream repositories for bundled libraries. The adapter pins a PacketEvents snapshot containing Adventure 5 support; the other Grim platforms retain their existing dependency. See [publishing instructions](PUBLISHING.md) for release setup and verification.
+Published releases and their remaining dependencies resolve using only `mavenCentral()`. Building this checkout still uses the upstream repositories for bundled libraries. The adapter pins a PacketEvents snapshot containing Adventure 5 support; the other Grim platforms retain their existing dependency.
 
 Initialize the native support before Minestom loads its settings, install its player provider after initialization, then start Grim before accepting players:
 
