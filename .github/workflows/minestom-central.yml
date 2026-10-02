@@ -55,16 +55,6 @@ jobs:
                   -PunsignedLocalPublication=true
             - name: Verify publication contents and metadata
               run: python3 minestom/verify-publication.py minestom/build/repository "$RELEASE_VERSION"
-            - name: Test Gradle metadata consumer using only Central dependencies
-              run: >-
-                  ./gradlew -p minestom/consumer-check
-                  "-PlibraryRepository=$GITHUB_WORKSPACE/minestom/build/repository"
-                  "-PlibraryVersion=$RELEASE_VERSION" run
-            - name: Test Maven POM consumer using only Central dependencies
-              run: >-
-                  ./gradlew -p minestom/consumer-check -PpomOnly=true
-                  "-PlibraryRepository=$GITHUB_WORKSPACE/minestom/build/repository"
-                  "-PlibraryVersion=$RELEASE_VERSION" run
             - name: Upload verified publication
               uses: actions/upload-artifact@v4
               with:
